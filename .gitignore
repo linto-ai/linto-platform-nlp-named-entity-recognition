@@ -1,2 +1,3 @@
 assets
 .env
+start_container.sh

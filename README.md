@@ -34,7 +34,8 @@ mv .envdefault .env
 # APP_LANG=fr en | Running language of application, "fr en", "fr", etc.
 # ASSETS_PATH_ON_HOST=./assets | Storage path of models on host. (only applicable when docker-compose is used)
 # ASSETS_PATH_IN_CONTAINER=/app/assets | Volume mount point of models in container. (only applicable when docker-compose is used)
-# WORKER_NUMBER=1 | Number of processing workers. (only applicable when docker-compose is used)
+# SERVICE_MODE=http
+# CONCURRENCY=1 | Number of processing workers. (only applicable when docker-compose is used)
 ```
 
 4 Build image
@@ -67,7 +68,7 @@ sudo docker-compose up
 </details>
 
 
-6 Navigate to `http://localhost/docs` or `http://localhost/redoc` in your browser, to explore the REST API interactively. See the examples for how to query the API.
+6 Navigate to `http://localhost/docs` in your browser, to explore the REST API interactively. See the examples for how to query the API.
 
 ## Specification for `http://localhost/ner/{lang}`
 
