@@ -13,7 +13,7 @@ from serving import GunicornServing
 from confparser import createParser
 from swagger import setupSwaggerUI
 
-from ner import get_data
+from components import get_data
 
 app = Flask("__ner-worker__")
 app.config["JSON_AS_ASCII"] = False
@@ -57,10 +57,9 @@ def transcribe(lang: str):
 
     response_body = []
     request_body = json.loads(request.data)
-    print(request_body)
     texts = [article["text"] for article in request_body.get("articles", [])]
     
-    component_cfg = request_body.get("component_cfg", [])
+    component_cfg = request_body.get("component_cfg", {})
 
     for doc in nlp.pipe(texts, component_cfg=component_cfg):
         response_body.append(get_data(doc))

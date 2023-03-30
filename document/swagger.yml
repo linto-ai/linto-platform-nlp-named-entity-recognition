@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: Named entities recognition API
-  description: API to detect named entities in a text.
+  title: Named Entity Recognition API
+  description: API to detect named entities in text.
   version: 0.2.0
 
 servers:
@@ -11,8 +11,8 @@ paths:
   /ner/{lang}:
     post:
       tags:
-      - Speech-To-Text API
-      summary: Perform Speech-to-Text
+      - Named Entity Recognition API
+      summary: Perform Named Entity Recognition
       parameters:
         - name: lang
           in: path

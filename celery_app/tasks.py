@@ -4,7 +4,7 @@ from typing import Dict, List
 import spacy
 
 from celery_app.celeryapp import celery
-from ner import get_data
+from components import get_data
 
 LM_MAP = {
     "fr": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0",

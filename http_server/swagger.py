@@ -10,7 +10,7 @@ def setupSwaggerUI(app, args):
         args.swagger_prefix + args.swagger_url,
         args.swagger_path,
         config={  # Swagger UI config overrides
-            'app_name': "LinTO Platform NLP Named entities recognition",
+            'app_name': "LinTO Platform NLP Named Entity Recognition",
             'spec': swagger_yml
         }
     )
