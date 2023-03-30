@@ -1,6 +1,8 @@
 import os
 from celery import Celery
 
+from ner import logger
+
 celery = Celery(__name__, include=['celery_app.tasks'])
 service_name = os.environ.get("SERVICE_NAME", "ner")
 broker_url = os.environ.get("SERVICES_BROKER")
@@ -19,4 +21,8 @@ celery.conf.update(
     {'task_routes': {
         'ner_task' : {'queue': 'ner'},}
     }
+)
+
+logger.info(
+    f"Celery configured for broker located at {broker_url} with service name {service_name}"
 )

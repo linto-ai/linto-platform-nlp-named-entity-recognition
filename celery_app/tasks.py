@@ -4,19 +4,17 @@ from typing import Dict, List
 import spacy
 
 from celery_app.celeryapp import celery
-from components import get_data
 
-LM_MAP = {
-    "fr": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0",
-    "en": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0"}
+from ner import logger
+from ner.processing import LM_MAP, MODELS
+from ner.processing import get_data
 
-# Load models
-MODELS = {LM_MAP[lang]: spacy.load(os.environ.get("ASSETS_PATH_IN_CONTAINER") + '/' + LM_MAP[lang]) for lang in os.environ.get("APP_LANG").split(" ")}
-print(f"Loaded {len(MODELS)} models: {MODELS.keys()}")
 
 @celery.task(name="ner_task")
 def ner_task(lang: str, texts: List[str], component_cfg: Dict = {}):
     """ ner_task """
+    logger.info('NER task received')
+
     # Check language availability
     if lang in LM_MAP.keys():
         model_name = LM_MAP[lang]

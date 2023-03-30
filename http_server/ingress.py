@@ -13,7 +13,8 @@ from serving import GunicornServing
 from confparser import createParser
 from swagger import setupSwaggerUI
 
-from components import get_data
+from ner.processing import LM_MAP, MODELS
+from ner.processing.utils import get_data
 
 app = Flask("__ner-worker__")
 app.config["JSON_AS_ASCII"] = False
@@ -21,15 +22,6 @@ app.config["JSON_SORT_KEYS"] = False
 
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s: %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 logger = logging.getLogger("__ner-worker__")
-
-# Supported languages and corresponding model names
-LM_MAP = {
-    "fr": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0",
-    "en": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0"}
-
-# Load models
-MODELS = {LM_MAP[lang]: spacy.load(os.environ.get("ASSETS_PATH_IN_CONTAINER") + '/' + LM_MAP[lang]) for lang in os.environ.get("APP_LANG").split(" ")}
-print(f"Loaded {len(MODELS)} models: {MODELS.keys()}")
 
 @app.route('/healthcheck', methods=['GET'])
 def healthcheck():
@@ -40,7 +32,7 @@ def oas_docs():
     return "Not Implemented", 501
 
 @app.route('/ner/<lang>', methods=['POST'])
-def transcribe(lang: str):
+def ner(lang: str):
     """Process a batch of articles and return the entities predicted by the
     given model. Each record in the data should have a key "text".
     """
