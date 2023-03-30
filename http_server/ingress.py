@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-import os
-from time import time
-import logging
 import json
-
-from flask import Flask, request, abort, Response, json
+import logging
+from time import time
 
 import spacy
+import components
 
+from flask import Flask, request, abort, Response, json
 from serving import GunicornServing
 from confparser import createParser
 from swagger import setupSwaggerUI
 
 from ner.processing import LM_MAP, MODELS
 from ner.processing.utils import get_data
+
 
 app = Flask("__ner-worker__")
 app.config["JSON_AS_ASCII"] = False

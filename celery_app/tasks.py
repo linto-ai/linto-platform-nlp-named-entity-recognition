@@ -1,13 +1,13 @@
-import os
-from typing import Dict, List
-
 import spacy
+import components
+
+from typing import Dict, List
 
 from celery_app.celeryapp import celery
 
 from ner import logger
 from ner.processing import LM_MAP, MODELS
-from ner.processing import get_data
+from ner.processing.utils import get_data
 
 
 @celery.task(name="ner_task")
