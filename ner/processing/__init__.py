@@ -1,4 +1,5 @@
 import os
+import ast
 import sys
 import spacy
 from time import time
@@ -11,11 +12,7 @@ __all__ = ["logger", "get_data", "LM_MAP", "MODELS"]
 logger.info("Loading language model(s)...")
 start = time()
 
-# Supported languages and corresponding model names
-LM_MAP = {
-    "fr": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0",
-    "en": "spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0"
-    }
+LM_MAP = ast.literal_eval(os.environ["LM_MAP"])
 
 try:
     MODELS = {LM_MAP[lang]: spacy.load(os.environ.get("ASSETS_PATH_IN_CONTAINER") + '/' + LM_MAP[lang]) for lang in os.environ.get("APP_LANG").split(" ")}
