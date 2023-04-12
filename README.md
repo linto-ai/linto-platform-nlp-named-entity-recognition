@@ -79,7 +79,7 @@ sudo docker-compose up
 </details>
 
 
-6 If running under `SERVICE_MODE=http`, navigate to `http://localhost/docs` in your browser, to explore the REST API interactively. See the examples for how to query the API.
+6 If running under `SERVICE_MODE=http`, navigate to `http://localhost/docs` in your browser, to explore the REST API interactively. See the examples for how to query the API. If running under `SERVICE_MODE=task`, plese refers to the individual section in the end of this README.
 
 ## Specification for `http://localhost/ner/{lang}`
 
