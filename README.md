@@ -3,12 +3,9 @@
 ## Description
 This repository is for building a Docker image for LinTO's NLP service: Named Entity Recognition on the basis of [linto-platform-nlp-core](https://github.com/linto-ai/linto-platform-nlp-core), can be deployed along with [LinTO stack](https://github.com/linto-ai/linto-platform-stack) or in a standalone way (see Develop section in below).
 
-linto-platform-nlp-named-entity-recognition is backed by [spaCy](https://spacy.io/) v3.0+ featuring transformer-based pipelines, thus deploying with GPU support is highly recommeded for inference efficiency.
+LinTo's NLP services adopt the basic design concept of spaCy: [component and pipeline](https://spacy.io/usage/processing-pipelines), components (located under the folder `components/`) are decoupled from the service and can be easily re-used in other spaCy projects, components are organised into pipelines for realising specific NLP tasks. 
 
-LinTo's NLP services adopt the basic design concept of spaCy: [component and pipeline](https://spacy.io/usage/processing-pipelines), components are decoupled from the service and can be easily re-used in other projects, components are organised into pipelines for realising specific NLP tasks. 
-
-This service uses [FastAPI](https://fastapi.tiangolo.com/) to serve spaCy's build-in components as pipelines:
-- `ner`: Named Entity Recognition
+This service can be launched in two ways: REST API and Celery task, with and without GPU support.
 
 ## Usage
 
@@ -29,14 +26,21 @@ bash scripts/download_models.sh
 
 2 configure running environment variables
 ```bash
-mv .envdefault .env
-# cat .envdefault
-# APP_LANG=fr en | Running language of application, "fr en", "fr", etc.
-# ASSETS_PATH_ON_HOST=./assets | Storage path of models on host. (only applicable when docker-compose is used)
-# ASSETS_PATH_IN_CONTAINER=/app/assets | Volume mount point of models in container. (only applicable when docker-compose is used)
-# SERVICE_MODE=http
-# CONCURRENCY=1 | Number of processing workers. (only applicable when docker-compose is used)
+cp .envdefault .env
 ```
+
+| Environment Variable | Description | Default Value |
+| --- | --- | --- |
+| `APP_LANG` | A space-separated list of supported languages for the application | fr en |
+| `ASSETS_PATH_ON_HOST` | The path to the assets folder on the host machine | ./assets |
+| `ASSETS_PATH_IN_CONTAINER` | The volume mount point of models in container | /app/assets |
+| `LM_MAP` | A JSON string that maps each supported language to its corresponding language model | {"fr":"spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0","en":"spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0"} |
+| `SERVICE_MODE` | The mode in which the service is served, either "http" (REST API) or "task" (Celery task) | "http" |
+| `CONCURRENCY` | The maximum number of requests that can be handled concurrently | 1 |
+| `USE_GPU` | A flag indicating whether to use GPU for computation or not, either "True" or "False" | True |
+| `SERVICE_NAME` | The name of the micro-service | ner |
+| `SERVICES_BROKER` | The URL of the broker server used for communication between micro-services | "redis://localhost:6379" |
+| `BROKER_PASS` | The password for accessing the broker server | None |
 
 4 Build image
 ```bash
@@ -53,22 +57,29 @@ sudo docker run --gpus all \
 --rm -p 80:80 \
 -v $PWD/assets:/app/assets:ro \
 --env-file .env \
-lintoai/linto-platform-nlp-named-entity-recognition:latest \
---workers 1
+lintoai/linto-platform-nlp-named-entity-recognition:latest
 ```
+<details>
+  <summary>Check running with CPU only setting</summary>
+  
+  - remove `--gpus all` from the first command.
+  - set `USE_GPU=False` in the `.env`.
+</details>
+
 or
+
 ```bash
 sudo docker-compose up
 ```
 <details>
   <summary>Check running with CPU only setting</summary>
   
-  - remove `--gpus all` from the first command.
   - remove `runtime: nvidia` from the `docker-compose.yml` file.
+  - set `USE_GPU=False` in the `.env`.
 </details>
 
 
-6 Navigate to `http://localhost/docs` in your browser, to explore the REST API interactively. See the examples for how to query the API.
+6 If running under `SERVICE_MODE=http`, navigate to `http://localhost/docs` in your browser, to explore the REST API interactively. See the examples for how to query the API.
 
 ## Specification for `http://localhost/ner/{lang}`
 
@@ -157,3 +168,32 @@ sudo docker-compose up
   ]
 }
 ```
+
+## Testing Celery mode locally
+1 Install Redis on your local machine, and run it with:
+```bash
+redis-server --protected-mode no --bind 0.0.0.0 --loglevel debug
+```
+
+2 Make sure in your `.env`, these two variables are set correctly as `SERVICE_MODE=task` and `SERVICES_BROKER=redis://172.17.0.1:6379`
+
+Then start your docker container with either `docker run` or `docker-compose up` as shown in the previous section.
+
+3 On your local computer, run this python script: 
+```python
+from celery import Celery
+celery = Celery(broker='redis://localhost:6379/0', backend='redis://localhost:6379/1')
+r = celery.send_task(
+    'ner_task', 
+    (
+        'en', 
+        [
+            "Apple Inc. is an American multinational technology company that specializes in consumer electronics, computer software and online services.",
+            "Apple was founded in 1976 by Steve Jobs, Steve Wozniak and Ronald Wayne to develop and sell Wozniak's Apple I personal computer."
+        ],
+        {"ner": {"top_n": 3}}
+    ),
+    queue='ner')
+r.get()
+```
+

@@ -2,10 +2,7 @@
 APP_LANG=fr en
 ASSETS_PATH_ON_HOST=./assets
 ASSETS_PATH_IN_CONTAINER=/app/assets
-LM_MAP = "{
-    'fr': 'spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0',
-    'en': 'spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0'
-    }"
+LM_MAP={"fr":"spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0","en":"spacy/xx_ent_wiki_sm-3.2.0/xx_ent_wiki_sm/xx_ent_wiki_sm-3.2.0"}
 
 # SERVING PARAMETERS
 SERVICE_MODE=http
